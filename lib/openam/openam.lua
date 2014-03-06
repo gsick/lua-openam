@@ -1,4 +1,6 @@
 
+-- Copyright (c) 2014 gsick --
+
 
 -- dependencies
 
@@ -9,14 +11,14 @@ local cjson_safe = require "cjson.safe"
 -- default cookie params
 
 local DEFAULT_COOKIE = {
-  name = "iplanetDirectoryPro",
-  openam_name = nil,
+  name = nil,
+  openam_name = "iplanetDirectoryPro",
   domain = ngx.req.get_headers()["Host"],
   secure = false,
   http_only = true,
   path = "/",
 }
-DEFAULT_COOKIE.openam_name = DEFAULT_COOKIE.name
+
 
 -- default rules for redirects
 
@@ -122,11 +124,15 @@ function _Openam.new(uri, cookie_params, redirect_params)
   cookie = DEFAULT_COOKIE
 
   if cookie_params then
-    if cookie_params.name ~= nil then
-      cookie.name = cookie_params.name
-    end
+
     if cookie_params.openam_name ~= nil then
       cookie.openam_name = cookie_params.openam_name
+    end
+    if cookie_params.name ~= nil then
+      cookie.name = cookie_params.name
+    else
+      -- same cookie/token name for both side if cookie.name == nil
+      cookie.name = cookie_params.openam_name
     end
     if cookie_params.domain ~= nil then
       cookie.domain = cookie_params.domain
