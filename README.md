@@ -3,7 +3,7 @@ lua-openam
 
 Lua OpenAM client driver for the nginx [HttpLuaModule](http://wiki.nginx.org/HttpLuaModule).<br />
 Use [OpenAM RESTful API](http://openam.forgerock.org/openam-documentation/openam-doc-source/doc/dev-guide/index/chap-rest.html).<br />
-It different than an OpenAM agent.<br />
+It is different than an OpenAM agent.<br />
 
 ## Dependencies
 
