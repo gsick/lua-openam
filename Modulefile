@@ -1,8 +1,0 @@
-name         'gsick-lua-openam'
-version      '0.0.1'
-source       'git://github.com/gsick/lua-openam.git'
-author       'Gamaliel Sick'
-license      'MIT'
-summary      'LUA OpenAM'
-description  'Lua OpenAM client driver for the nginx HttpLuaModule'
-project_page 'https://github.com/gsick/lua-openam'
