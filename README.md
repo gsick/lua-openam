@@ -5,6 +5,10 @@ Lua OpenAM client driver for the nginx [HttpLuaModule](http://wiki.nginx.org/Htt
 Use [OpenAM RESTful API](http://openam.forgerock.org/openam-documentation/openam-doc-source/doc/dev-guide/index/chap-rest.html).<br />
 It is different than an OpenAM agent.<br />
 
+## Status
+
+beta
+
 ## Dependencies
 
 * [Lua CJSON](http://www.kyne.com.au/~mark/software/lua-cjson.php)
@@ -16,20 +20,16 @@ It is different than an OpenAM agent.<br />
 lua_package_cpath "/usr/lib64/lua/5.1/?.so;;";
 lua_package_path "/usr/lib64/lua/5.1/resty/http/?.lua;/usr/lib64/lua/5.1/openam/?.lua;;";
 
-init_by_lua '
-  openam = require "openam"
-  openam_uri = "http://openam.example.com:8080/openam"
-  cookie_params = {name = "session"}
-  redirect_params = {success_url = false}
-';
-
 server {
 
   location /login.html {
     access_by_lua '
     
-      local obj = openam.new(openam_uri, cookie_params,redirect_params)
-      local status, json = op:authenticate("my_login", "my_password")
+      local openam = require "openam"
+      local openam_uri = "http://openam.example.com:8080/openam"
+
+      local obj = openam.new(openam_uri, {name = "session"}, {success_url = false})
+      local status, json = obj:authenticate("my_login", "my_password")
 
       if not status == ngx.HTPP_OK then
         -- do something
@@ -43,7 +43,10 @@ server {
   location /resource.html {
     access_by_lua '
     
-      local obj = openam.new(openam_uri, cookie_params,redirect_params)
+      local openam = require "openam"
+      local openam_uri = "http://openam.example.com:8080/openam"
+
+      local obj = openam.new(openam_uri, {name = "session"}, {success_url = false})
       local status, json = obj:isTokenValid()
       -- local status, json = obj:authorize()
 
@@ -58,7 +61,10 @@ server {
   location /logout.html {
     access_by_lua '
 
-      local obj = openam.new(openam_uri, cookie_params)
+      local openam = require "openam"
+      local openam_uri = "http://openam.example.com:8080/openam"
+
+      local obj = openam.new(openam_uri, {name = "session"})
       local status, json = obj:logout()
 
       -- do something
@@ -71,7 +77,10 @@ server {
   location /resource.html {
     access_by_lua '
 
-      local obj = openam.new(openam_uri, cookie_params)
+      local openam = require "openam"
+      local openam_uri = "http://openam.example.com:8080/openam"
+
+      local obj = openam.new(openam_uri, {name = "session"})
       local status, json = obj:readIdentity("my_login")
 
       if not status == ngx.HTPP_OK then
