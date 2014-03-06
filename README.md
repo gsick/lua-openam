@@ -1,8 +1,8 @@
 lua-openam
 ==========
 
-Lua OpenAM client driver for the nginx [HttpLuaModule](http://wiki.nginx.org/HttpLuaModule).
-Use [OpenAM RESTful API](http://openam.forgerock.org/openam-documentation/openam-doc-source/doc/dev-guide/index/chap-rest.html).
+Lua OpenAM client driver for the nginx [HttpLuaModule](http://wiki.nginx.org/HttpLuaModule). 
+Use [OpenAM RESTful API](http://openam.forgerock.org/openam-documentation/openam-doc-source/doc/dev-guide/index/chap-rest.html). 
 It different than an OpenAM agent.
 
 ## Dependencies
@@ -30,14 +30,12 @@ server {
     access_by_lua '
 
       local obj = openam.new(openam_uri, cookie_params,redirect_params)
-
       local status, json = op:authenticate("my_login", "my_password")
 
       if not status == ngx.HTPP_OK then
         -- do something
         -- e.g. ngx.redirect(...), ngx.exit(...)
       end
-
       -- session cookie added in the http response
     ';
 
@@ -49,7 +47,6 @@ server {
     access_by_lua '
 
       local obj = openam.new(openam_uri, cookie_params,redirect_params)
-
       local status, json = obj:isTokenValid()
       -- local status, json = obj:authorize()
 
@@ -66,13 +63,11 @@ server {
 
     access_by_lua '
 
-      local obj = openam.new(openam_uri, cookie_params,redirect_params)
-
+      local obj = openam.new(openam_uri, cookie_params)
       local status, json = obj:logout()
 
       -- do something
       -- e.g. ngx.redirect(...), ngx.exit(...)
-
       -- session cookie removed in the http response
     ';
 
@@ -83,8 +78,7 @@ server {
 
     access_by_lua '
 
-      local obj = openam.new(openam_uri, cookie_params,redirect_params)
-
+      local obj = openam.new(openam_uri, cookie_params)
       local status, json = obj:readIdentity("my_login")
 
       if not status == ngx.HTPP_OK then
