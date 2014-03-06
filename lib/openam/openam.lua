@@ -23,8 +23,8 @@ local DEFAULT_COOKIE = {
 -- default rules for redirects
 
 local DEFAULT_REDIRECT = {
-  success_url = false,
-  failure_url = false,
+  follow_success_url = false,
+  follow_failure_url = false,
 }
 
 
@@ -72,23 +72,6 @@ local function jsonDecode(cjson, text)
     ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
   end
   return json
-end
-
-
--- return token or error if no token found in cookie -- should redirect to a custom page ?
-
-local function getToken(cookie)
-
-  local token = getSessionCookie(cookie)
-
-  if not token then
-    ngx.log(ngx.ERR, "no token found in the request")
-
-    -- default return 500
-    ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
-  end
-  
-  return token
 end
 
 
@@ -151,11 +134,11 @@ function _Openam.new(uri, cookie_params, redirect_params)
   redirect = DEFAULT_REDIRECT
 
   if redirect_params then
-    if redirect_params.success_url ~= nil then
-      redirect.success_url = redirect_params.success_url
+    if redirect_params.follow_success_url ~= nil then
+      redirect.follow_success_url = redirect_params.follow_success_url
     end
-    if redirect_params.failure_url ~= nil then
-      redirect.failure_url = redirect_params.failure_url
+    if redirect_params.follow_failure_url ~= nil then
+      redirect.follow_failure_url = redirect_params.follow_failure_url
     end
   end
 
@@ -218,7 +201,7 @@ function _Openam.authenticate(self, username, password, realm)
       log(ngx.NOTICE, "authenticate", res.status, json.tokenId, username, nil, nil)
 
       -- Redirect to success url
-      if self.redirect.success_url and json.successUrl then
+      if self.redirect.follow_success_url and json.successUrl then
         log(ngx.NOTICE, "authenticate", res.status, json.tokenId, username, json.successUrl, nil)
         ngx.redirect(json.successUrl)
       end
@@ -230,7 +213,7 @@ function _Openam.authenticate(self, username, password, realm)
       log(ngx.WARN, "authenticate", res.status, nil, username, nil, res.body)
 
       -- Redirect to failure url
-      if self.redirect.failure_url and json.failureUrl then
+      if self.redirect.follow_failure_url and json.failureUrl then
         log(ngx.NOTICE, "authenticate", res.status, nil, username, json.failureUrl, nil)
         ngx.redirect(json.failureUrl)
       end
@@ -261,8 +244,11 @@ function _Openam.logout(self, token)
   local cjson = self.cjson
   local uri = self.uri .. "/json/sessions/?_action=logout"
 
+  -- security test, return error if no token found in cookie
+  token = token and token or getSessionCookie(self.cookie)
   if not token then
-    token = getToken(self.cookie)
+    ngx.log(ngx.ERR, "no token found in the request")
+    return ngx.HTTP_UNAUTHORIZED, nil
   end
 
   ngx.log(ngx.DEBUG, uri)
@@ -333,8 +319,11 @@ function _Openam.isTokenValid(self, logout, token)
   local cjson = self.cjson
   local uri = self.uri .. "/identity/isTokenValid"
 
+  -- security test, return error if no token found in cookie
+  token = token and token or getSessionCookie(self.cookie)
   if not token then
-    token = getToken(self.cookie)
+    ngx.log(ngx.ERR, "no token found in the request")
+    return ngx.HTTP_UNAUTHORIZED, nil
   end
 
   ngx.log(ngx.DEBUG, uri)
@@ -389,8 +378,11 @@ function _Openam.authorize(self, uri_value, token)
   local cjson = self.cjson
   local uri = self.uri .. "/identity/authorize?"
 
+  -- security test, return error if no token found in cookie
+  token = token and token or getSessionCookie(self.cookie)
   if not token then
-    token = getToken(self.cookie)
+    ngx.log(ngx.ERR, "no token found in the request")
+    return ngx.HTTP_UNAUTHORIZED, nil
   end
 
   if not uri_value then
@@ -460,8 +452,11 @@ function _Openam.readIdentity(self, user, fields, realm, token)
     uri = uri .. "?_fields=" .. ngx.escape_uri(fields)
   end
 
+  -- security test, return error if no token found in cookie
+  token = token and token or getSessionCookie(self.cookie)
   if not token then
-    token = getToken(self.cookie)
+    ngx.log(ngx.ERR, "no token found in the request")
+    return ngx.HTTP_UNAUTHORIZED, nil
   end
 
   ngx.log(ngx.DEBUG, uri)
