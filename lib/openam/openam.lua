@@ -10,13 +10,13 @@ local cjson_safe = require "cjson.safe"
 
 local DEFAULT_COOKIE = {
   name = "iplanetDirectoryPro",
-  openam_name = name,
+  openam_name = nil,
   domain = ngx.req.get_headers()["Host"],
   secure = false,
   http_only = true,
   path = "/",
 }
-
+DEFAULT_COOKIE.openam_name = DEFAULT_COOKIE.name
 
 -- default rules for redirects
 
