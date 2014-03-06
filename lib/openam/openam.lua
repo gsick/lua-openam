@@ -10,6 +10,7 @@ local cjson_safe = require "cjson.safe"
 
 local DEFAULT_COOKIE = {
   name = "iplanetDirectoryPro",
+  openam_name = name,
   domain = ngx.req.get_headers()["Host"],
   secure = false,
   http_only = true,
@@ -72,7 +73,7 @@ local function jsonDecode(cjson, text)
 end
 
 
--- return token or error if no token found in cookie -- should redirect to login page ?
+-- return token or error if no token found in cookie -- should redirect to a custom page ?
 
 local function getToken(cookie)
 
@@ -86,6 +87,24 @@ local function getToken(cookie)
   end
   
   return token
+end
+
+
+-- log for better parsing
+-- [response status,token,usernam,url/uri,response body/cmd result]
+
+local function log(level, cmd, status, token, username, uri, text)
+
+  local s = '['
+  s = s .. (cmd and cmd or '') .. '|'
+  s = s .. (status and status or '') .. '|'
+  s = s .. (token and token or '') .. '|'
+  s = s .. (username and username or '') .. '|'
+  s = s .. (uri and uri or '') .. '|'
+  s = s .. (text and text or '') .. '|'
+  s = s .. ']'
+
+  ngx.log(level, s)
 end
 
 
@@ -103,19 +122,22 @@ function _Openam.new(uri, cookie_params, redirect_params)
   cookie = DEFAULT_COOKIE
 
   if cookie_params then
-    if not cookie_params.name ~= nil then
+    if cookie_params.name ~= nil then
       cookie.name = cookie_params.name
     end
-    if not cookie_params.domain ~= nil then
+    if cookie_params.openam_name ~= nil then
+      cookie.openam_name = cookie_params.openam_name
+    end
+    if cookie_params.domain ~= nil then
       cookie.domain = cookie_params.domain
     end
-    if not cookie_params.secure ~= nil then
+    if cookie_params.secure ~= nil then
       cookie.secure = cookie_params.secure
     end
-    if not cookie_params.http_only ~= nil then
+    if cookie_params.http_only ~= nil then
       cookie.http_only = cookie_params.http_only
     end
-    if not cookie_params.path ~= nil then
+    if cookie_params.path ~= nil then
       cookie.path = cookie_params.path
     end
   end
@@ -123,10 +145,10 @@ function _Openam.new(uri, cookie_params, redirect_params)
   redirect = DEFAULT_REDIRECT
 
   if redirect_params then
-    if not redirect_params.success_url ~= nil then
+    if redirect_params.success_url ~= nil then
       redirect.success_url = redirect_params.success_url
     end
-    if not redirect_params.failure_url ~= nil then
+    if redirect_params.failure_url ~= nil then
       redirect.failure_url = redirect_params.failure_url
     end
   end
@@ -165,7 +187,7 @@ function _Openam.authenticate(self, username, password, realm)
 
   uri = uri .. "/authenticate"
 
-  ngx.log(ngx.INFO, "uri: " .. uri)
+  ngx.log(ngx.DEBUG, uri)
 
   local res, err = httpc:request_uri(uri, {
     method = "POST",
@@ -178,7 +200,7 @@ function _Openam.authenticate(self, username, password, realm)
   })
 
   if res then
-    ngx.log(ngx.INFO, res.body)
+    ngx.log(ngx.DEBUG, res.body)
 
     local json = jsonDecode(cjson, res.body)
 
@@ -187,11 +209,11 @@ function _Openam.authenticate(self, username, password, realm)
       -- Set session cookie
       setSessionCookie(self.cookie, json.tokenId)
 
-      ngx.log(ngx.NOTICE, "connection ok for username: \"" .. username .. "\", session: " .. json.tokenId)
+      log(ngx.NOTICE, "authenticate", res.status, json.tokenId, username, nil, nil)
 
       -- Redirect to success url
       if self.redirect.success_url and json.successUrl then
-        ngx.log(ngx.NOTICE, "redirect username: \"" .. username .. "\", to: " .. json.successUrl)
+        log(ngx.NOTICE, "authenticate", res.status, json.tokenId, username, json.successUrl, nil)
         ngx.redirect(json.successUrl)
       end
 
@@ -199,19 +221,19 @@ function _Openam.authenticate(self, username, password, realm)
     end
 
     if res.status == ngx.HTTP_UNAUTHORIZED then
-      ngx.log(ngx.WARN, "invalid username or password \"" .. username .. "\"")
+      log(ngx.WARN, "authenticate", res.status, nil, username, nil, res.body)
 
       -- Redirect to failure url
       if self.redirect.failure_url and json.failureUrl then
-        ngx.log(ngx.NOTICE, "redirect username: \"" .. username .. "\", to: " .. json.failureUrl)
+        log(ngx.NOTICE, "authenticate", res.status, nil, username, json.failureUrl, nil)
         ngx.redirect(json.failureUrl)
       end
 
-      ngx.exit(res.status)
+      return res.status, json
     end
 
-    ngx.log(ngx.ERR, "uri: " .. uri .. " status: " .. res.status .. " body: " .. res.body)
-    ngx.exit(res.status)
+    log(ngx.ERR, "authenticate", res.status, nil, username, uri, res.body)
+    return res.status, nil
   end
 
   if err then
@@ -237,19 +259,19 @@ function _Openam.logout(self, token)
     token = getToken(self.cookie)
   end
 
-  ngx.log(ngx.INFO, "uri: " .. uri)
+  ngx.log(ngx.DEBUG, uri)
 
   local res, err = httpc:request_uri(uri, {
     method = "POST",
     body = "",
     headers = {
       ["Content-Type"] = "application/json",
-      [self.cookie.name] = token,
+      [self.cookie.openam_name] = token,
     }
   })
 
   if res then
-    ngx.log(ngx.INFO, res.body)
+    ngx.log(ngx.DEBUG, res.body)
 
     local json = jsonDecode(cjson, res.body)
 
@@ -257,12 +279,12 @@ function _Openam.logout(self, token)
     setSessionCookie(self.cookie, token, true)
 
     if res.status == ngx.HTTP_OK then
-      ngx.log(ngx.NOTICE, json.result .. " for session: \"" .. token .. "\"")
+      log(ngx.NOTICE, "logout", res.status, token, nil, nil, nil)
       return res.status, json
     end
 
-    ngx.log(ngx.ERR, "uri: " .. uri .. " status: " .. res.status .. " body: " .. res.body)
-    ngx.exit(res.status)
+    log(ngx.ERR, "logout", res.status, token, nil, uri, res.body)
+    return res.status, json
   end
 
   if err then
@@ -274,6 +296,8 @@ function _Openam.logout(self, token)
 end
 
 
+-- tranform weird response "boolean=true" or "boolean=false" to json
+
 local function booleanResponseDecode(cjson, text, key_name)
   local valid = false
   local m, err = ngx.re.match(text, "(true)|(false)")
@@ -283,7 +307,7 @@ local function booleanResponseDecode(cjson, text, key_name)
   end
 
   if err then
-    ngx.log(ngx.ERR, "error: ", err)
+    ngx.log(ngx.ERR, err)
     ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
   end
 
@@ -307,7 +331,7 @@ function _Openam.isTokenValid(self, logout, token)
     token = getToken(self.cookie)
   end
 
-  ngx.log(ngx.INFO, "uri: " .. uri)
+  ngx.log(ngx.DEBUG, uri)
 
   local res, err = httpc:request_uri(uri, {
     method = "POST",
@@ -318,15 +342,15 @@ function _Openam.isTokenValid(self, logout, token)
   })
 
   if res then
-    ngx.log(ngx.INFO, res.body)
+    ngx.log(ngx.DEBUG, res.body)
 
     if res.status == ngx.HTTP_OK then
 
       local json = booleanResponseDecode(cjson, res.body, "valid")
 
-      ngx.log(ngx.NOTICE, tostring(json.valid) .. " for session: \"" .. token .. "\"")
+      log(ngx.NOTICE, "isTokenValid", res.status, token, nil, nil, tostring(json.valid))
 
-      if logout then
+      if logout and not json.valid then
         local status, json2 = self:logout(token)
         return status, json2
       end
@@ -334,8 +358,8 @@ function _Openam.isTokenValid(self, logout, token)
       return res.status, json
     end
 
-    ngx.log(ngx.ERR, "uri: " .. uri .. " status: " .. res.status .. " body: " .. res.body)
-    ngx.exit(res.status)
+    log(ngx.ERR, "isTokenValid", res.status, token, nil, uri, res.body)
+    return res.status, nil
   end
 
   if err then
@@ -369,7 +393,7 @@ function _Openam.authorize(self, uri_value, token)
 
   uri = uri .. "uri=" .. ngx.escape_uri(uri_value) .. "&subjectid=" .. ngx.escape_uri(token)
 
-  ngx.log(ngx.INFO, "uri: " .. uri)
+  ngx.log(ngx.DEBUG, uri)
 
   local res, err = httpc:request_uri(uri, {
     method = "GET",
@@ -381,13 +405,13 @@ function _Openam.authorize(self, uri_value, token)
   })
 
   if res then
-    ngx.log(ngx.INFO, res.body)
+    ngx.log(ngx.DEBUG, res.body)
 
     if res.status == ngx.HTTP_OK then
 
       local json = booleanResponseDecode(cjson, res.body, "authorize")
 
-      ngx.log(ngx.NOTICE, tostring(json.authorize) .. " for session: \"" .. token .. "\"")
+      log(ngx.NOTICE, "authorize", res.status, token, nil, uri_value, tostring(json.authorize))
 
       if json.authorize then
         return res.status, json
@@ -396,8 +420,8 @@ function _Openam.authorize(self, uri_value, token)
       return ngx.HTTP_UNAUTHORIZED, json
     end
 
-    ngx.log(ngx.ERR, "uri: " .. uri .. " status: " .. res.status .. " body: " .. res.body)
-    ngx.exit(res.status)
+    log(ngx.ERR, "authorize", res.status, token, nil, uri, res.body)
+    return res.status, nil
   end
 
   if err then
@@ -412,6 +436,8 @@ end
 -- https://openam.example.com:8443/openam/json[/realm]/users/demo
 -- https://openam.example.com:8443/openam/json[/realm]/users/demo?_fields=name,uid
 
+-- 404 {"code":404,"reason":"Not Found","message":"Resource cannot be found."},
+
 function _Openam.readIdentity(self, user, fields, realm, token)
 
   local httpc = self.httpc
@@ -425,39 +451,38 @@ function _Openam.readIdentity(self, user, fields, realm, token)
   uri = uri .. "/users/" .. ngx.escape_uri(user)
 
   if fields then
-    uri = uri .. "?_fields="
-    
+    uri = uri .. "?_fields=" .. ngx.escape_uri(fields)
   end
 
   if not token then
     token = getToken(self.cookie)
   end
 
-  ngx.log(ngx.INFO, "uri: " .. uri)
+  ngx.log(ngx.DEBUG, uri)
 
   local res, err = httpc:request_uri(uri, {
     method = "GET",
     body = "",
     headers = {
       ["Content-Type"] = "application/json",
-      [self.cookie.name] = token,
+      [self.cookie.openam_name] = token,
     }
   })
 
   if res then
-    ngx.log(ngx.INFO, res.body)
+    ngx.log(ngx.DEBUG, res.body)
 
     if res.status == ngx.HTTP_OK then
 
       local json = jsonDecode(cjson, res.body)
 
-      ngx.log(ngx.NOTICE, "read identity for user: \"" .. user .. "\" for session: \"" .. token .. "\"")
+      log(ngx.NOTICE, "readIdentity", res.status, token, user, nil, nil)
 
       return res.status, json
     end
 
-    ngx.log(ngx.ERR, "uri: " .. uri .. " status: " .. res.status .. " body: " .. res.body)
-    ngx.exit(res.status)
+    log(ngx.ERR, "readIdentity", res.status, token, user, uri, res.body)
+    return res.status, nil
   end
 
   if err then
