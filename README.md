@@ -26,9 +26,8 @@ init_by_lua '
 server {
 
   location /login.html {
-
     access_by_lua '
-
+    
       local obj = openam.new(openam_uri, cookie_params,redirect_params)
       local status, json = op:authenticate("my_login", "my_password")
 
@@ -38,14 +37,12 @@ server {
       end
       -- session cookie added in the http response
     ';
-
     # proxy_pass/to/somewhere/...
   }
 
   location /resource.html {
-
     access_by_lua '
-
+    
       local obj = openam.new(openam_uri, cookie_params,redirect_params)
       local status, json = obj:isTokenValid()
       -- local status, json = obj:authorize()
@@ -55,12 +52,10 @@ server {
         -- e.g. ngx.redirect(...), ngx.exit(...)
       end
     ';
-
     # proxy_pass/to/somewhere/...
   }
 
   location /logout.html {
-
     access_by_lua '
 
       local obj = openam.new(openam_uri, cookie_params)
@@ -70,12 +65,10 @@ server {
       -- e.g. ngx.redirect(...), ngx.exit(...)
       -- session cookie removed in the http response
     ';
-
     # proxy_pass/to/somewhere/...
   }
 
   location /resource.html {
-
     access_by_lua '
 
       local obj = openam.new(openam_uri, cookie_params)
@@ -86,7 +79,6 @@ server {
         -- e.g. ngx.redirect(...), ngx.exit(...)
       end
     ';
-
     # proxy_pass/to/somewhere/...
   }
 }
