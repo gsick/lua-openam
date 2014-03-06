@@ -13,7 +13,7 @@ local cjson_safe = require "cjson.safe"
 local DEFAULT_COOKIE = {
   name = nil,
   openam_name = "iplanetDirectoryPro",
-  domain = nil,
+  domain = ngx.req.get_headers()["Host"],
   secure = false,
   http_only = true,
   path = "/",
@@ -120,8 +120,6 @@ function _Openam.new(uri, cookie_params, redirect_params)
     end
     if cookie_params.domain ~= nil then
       cookie.domain = cookie_params.domain
-    else
-      cookie.domain = ngx.req.get_headers()["Host"]
     end
     if cookie_params.secure ~= nil then
       cookie.secure = cookie_params.secure

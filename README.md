@@ -7,7 +7,7 @@ It is different than an OpenAM agent.<br />
 
 ## Status
 
-beta
+beta, the api may be change.
 
 ## Dependencies
 
@@ -94,6 +94,28 @@ server {
 ```
 
 ## API
+
+### new
+
+`openam = openam.new(uri, cookie_params?, redirect_params?)`
+
+Creates the openam object. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.
+
+The `cookie_params` table accepts the following fields, can be `nil`:
+* `name`: string, cookie name between your app and nginx, `openam_name` by default
+* `openam_name`: string, cookie name between nginx and openam, `iplanetDirectoryPro` by default
+* `domain`: string, cookie domain, `host` by default
+* `secure`: boolean, cookie secure attribut, `false` by default
+* `http_only`: boolean, cookie httpOnly attribut, `true` by default
+* `path`: string, cookie path, `/` by default
+
+The `redirect_params` table accepts the following fields, can be `nil`:
+* `follow_success_url`: boolean, follow success url sent by OpenAM when authentication success, `false` by default
+* `follow_failure_url`: boolean, follow failure url sent by OpenAM when authentication failed, `false` by default
+
+### authenticate
+
+
 
 ## Author
 
