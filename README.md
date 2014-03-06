@@ -24,7 +24,7 @@ server {
 
   location /login.html {
     access_by_lua '
-    
+
       local openam = require "openam"
       local openam_uri = "http://openam.example.com:8080/openam"
 
@@ -42,7 +42,7 @@ server {
 
   location /resource.html {
     access_by_lua '
-    
+
       local openam = require "openam"
       local openam_uri = "http://openam.example.com:8080/openam"
 
