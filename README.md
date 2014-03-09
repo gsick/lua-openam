@@ -101,21 +101,88 @@ server {
 
 Creates the openam object. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.
 
-The `cookie_params` table accepts the following fields, can be `nil`:
-* `name`: string, cookie name between your app and nginx, `openam_name` by default
-* `openam_name`: string, cookie name between nginx and openam, `iplanetDirectoryPro` by default
-* `domain`: string, cookie domain, `host` by default
-* `secure`: boolean, cookie secure attribut, `false` by default
-* `http_only`: boolean, cookie httpOnly attribut, `true` by default
-* `path`: string, cookie path, `/` by default
+* `uri`: openam URI
 
-The `redirect_params` table accepts the following fields, can be `nil`:
-* `follow_success_url`: boolean, follow success url sent by OpenAM when authentication success, `false` by default
-* `follow_failure_url`: boolean, follow failure url sent by OpenAM when authentication failed, `false` by default
+The `cookie_params` table accepts the following fields:
+* `name`: string, cookie name between your app and nginx, default: `openam_name`
+* `openam_name`: string, cookie name between nginx and openam, default: `iplanetDirectoryPro`
+* `domain`: string, cookie domain, default: `host`
+* `secure`: boolean, cookie secure attribut, default: `false`
+* `http_only`: boolean, cookie httpOnly attribut, default: `true`
+* `path`: string, cookie path, default: `/`
+
+The `redirect_params` table accepts the following fields:
+* `follow_success_url`: boolean, follow success url sent by OpenAM when authentication success, default: `false`
+* `follow_failure_url`: boolean, follow failure url sent by OpenAM when authentication failed, default: `false`
 
 ### authenticate
 
+`status, json = openam:authenticate(username, password, realm?)`
 
+Authenticate an user. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.<br />
+Add a session cookie with the openam token.
+
+* `username`: string, username
+* `password`: string, password
+* `realm`: string, realm used for authentication, optional
+
+Return:
+* `status`: response http status
+* `json`: nil if status not equal to 200 or 401 otherwise openam json response
+
+### logout
+
+`status, json = openam:logout(token?)`
+
+Logout an user. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.<br />
+Remove the session cookie with the openam token.
+
+* `token`: string, openam token, optional
+
+Return:
+* `status`: response http status
+* `json`: nil if no response otherwise openam json response
+
+### isTokenValid
+
+`status, json = openam:logout(logout?, token?)`
+
+Check the validity of the token. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.<br />
+
+* `logout`: boolean, call logout if invalid token, optional
+* `token`: string, openam token, optional
+
+Return:
+* `status`: response http status
+* `json`: nil if status not equal to 200 otherwise openam json response
+
+### authorize
+
+`status, json = openam:authorize(uri_value?, token?)`
+
+Check the access to an uri. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.<br />
+
+* `uri_value`: string, uri to check, optional, default: `scheme://host/uri`
+* `token`: string, openam token, optional
+
+Return:
+* `status`: response http status
+* `json`: nil if status not equal to 200 or 401 otherwise openam json response
+
+### readIdentity
+
+`status, json = openam:readIdentity(self, user, fields?, realm?, token?)`
+
+Read an identity. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.<br />
+
+* `user`: string, username
+* `fields`: string separate by ',', selected fields, optional
+* `realm`: string, user realm, optional
+* `token`: string, openam token, optional
+
+Return:
+* `status`: response http status
+* `json`: nil if status not equal to 200 otherwise openam json response
 
 ## Author
 
