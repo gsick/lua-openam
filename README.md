@@ -31,7 +31,7 @@ server {
       local obj = openam.new(openam_uri, {name = "session"}, {success_url = false})
       local status, json = obj:authenticate("my_login", "my_password")
 
-      if status ~= ngx.HTPP_OK then
+      if status ~= ngx.HTTP_OK then
         -- do something
         -- e.g. ngx.redirect(...), ngx.exit(...)
       end
@@ -50,7 +50,7 @@ server {
       local status, json = obj:isTokenValid()
       -- local status, json = obj:authorize()
 
-      if status ~= ngx.HTPP_OK then
+      if status ~= ngx.HTTP_OK then
         -- do something
         -- e.g. ngx.redirect(...), ngx.exit(...)
       end
@@ -83,7 +83,7 @@ server {
       local obj = openam.new(openam_uri, {name = "session"})
       local status, json = obj:readIdentity("my_login")
 
-      if if status ~= ngx.HTPP_OK then
+      if if status ~= ngx.HTTP_OK then
         -- do something
         -- e.g. ngx.redirect(...), ngx.exit(...)
       end

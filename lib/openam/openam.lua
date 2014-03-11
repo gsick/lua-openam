@@ -213,7 +213,7 @@ function _Openam.authenticate(self, username, password, realm)
     end
 
     -- Eliminate the callback authentication mode when there is json.authId and status 200 (no tokenId)
-    if res.status == ngx.HTTP_UNAUTHORIZED or res.status == ngx.HTTP_OK then
+    if res.status == ngx.HTTP_UNAUTHORIZED or (res.status == ngx.HTTP_OK and json.tokenId == nil) then
       log(ngx.WARN, "authenticate", ngx.HTTP_UNAUTHORIZED, nil, username, nil, res.body)
 
       -- Redirect to failure url
