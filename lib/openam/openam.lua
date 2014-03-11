@@ -114,9 +114,6 @@ function _Openam.new(uri, cookie_params, redirect_params)
     end
     if cookie_params.name ~= nil then
       cookie.name = cookie_params.name
-    else
-      -- same cookie/token name for both side if cookie.name == nil
-      cookie.name = cookie_params.openam_name
     end
     if cookie_params.domain ~= nil then
       cookie.domain = cookie_params.domain
@@ -130,6 +127,11 @@ function _Openam.new(uri, cookie_params, redirect_params)
     if cookie_params.path ~= nil then
       cookie.path = cookie_params.path
     end
+  end
+
+  if cookie.name == nil then
+    -- same cookie/token name for both side if cookie.name == nil
+    cookie.name = cookie.openam_name
   end
 
   redirect = DEFAULT_REDIRECT
@@ -194,7 +196,7 @@ function _Openam.authenticate(self, username, password, realm)
 
     local json = jsonDecode(cjson, res.body)
 
-    if res.status == ngx.HTTP_OK then
+    if res.status == ngx.HTTP_OK and json.tokenId then
 
       -- Set session cookie
       setSessionCookie(self.cookie, json.tokenId)
@@ -207,21 +209,23 @@ function _Openam.authenticate(self, username, password, realm)
         ngx.redirect(json.successUrl)
       end
 
-      return res.status, json
+      return ngx.HTTP_OK, json
     end
 
-    if res.status == ngx.HTTP_UNAUTHORIZED then
-      log(ngx.WARN, "authenticate", res.status, nil, username, nil, res.body)
+    -- Eliminate the callback authentication mode when there is json.authId and status 200 (no tokenId)
+    if res.status == ngx.HTTP_UNAUTHORIZED or res.status == ngx.HTTP_OK then
+      log(ngx.WARN, "authenticate", ngx.HTTP_UNAUTHORIZED, nil, username, nil, res.body)
 
       -- Redirect to failure url
       if self.redirect.follow_failure_url and json.failureUrl then
-        log(ngx.NOTICE, "authenticate", res.status, nil, username, json.failureUrl, nil)
+        log(ngx.NOTICE, "authenticate", ngx.HTTP_UNAUTHORIZED, nil, username, json.failureUrl, nil)
         ngx.redirect(json.failureUrl)
       end
 
-      return res.status, json
+      return ngx.HTTP_UNAUTHORIZED, json
     end
 
+    -- should never be 200 here
     log(ngx.ERR, "authenticate", res.status, nil, username, uri, res.body)
     return res.status, nil
   end

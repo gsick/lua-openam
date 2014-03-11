@@ -31,7 +31,7 @@ server {
       local obj = openam.new(openam_uri, {name = "session"}, {success_url = false})
       local status, json = obj:authenticate("my_login", "my_password")
 
-      if not status == ngx.HTPP_OK then
+      if status ~= ngx.HTPP_OK then
         -- do something
         -- e.g. ngx.redirect(...), ngx.exit(...)
       end
@@ -50,7 +50,7 @@ server {
       local status, json = obj:isTokenValid()
       -- local status, json = obj:authorize()
 
-      if not status == ngx.HTPP_OK then
+      if status ~= ngx.HTPP_OK then
         -- do something
         -- e.g. ngx.redirect(...), ngx.exit(...)
       end
@@ -83,7 +83,7 @@ server {
       local obj = openam.new(openam_uri, {name = "session"})
       local status, json = obj:readIdentity("my_login")
 
-      if not status == ngx.HTPP_OK then
+      if if status ~= ngx.HTPP_OK then
         -- do something
         -- e.g. ngx.redirect(...), ngx.exit(...)
       end
@@ -104,7 +104,7 @@ Creates the openam object. In case of failures, call `ngx.exit` with `HTTP_FORBI
 * `uri`: openam URI
 
 The `cookie_params` table accepts the following fields:
-* `name`: string, cookie name between your app and nginx, default: `openam_name`
+* `name`: string, cookie name between your app and nginx, default: `openam_name` value
 * `openam_name`: string, cookie name between nginx and openam, default: `iplanetDirectoryPro`
 * `domain`: string, cookie domain, default: `host`
 * `secure`: boolean, cookie secure attribut, default: `false`
@@ -176,7 +176,7 @@ Return:
 Read an identity. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.<br />
 
 * `user`: string, username
-* `fields`: string separate by ',', selected fields, optional
+* `fields`: string separate by `,`, selected fields, optional
 * `realm`: string, user realm, optional
 * `token`: string, openam token, optional
 
@@ -190,6 +190,7 @@ Gamaliel Sick
 
 ## Licence
 
+```
 The MIT License (MIT)
 
 Copyright (c) 2014 gsick
@@ -210,3 +211,4 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+```
