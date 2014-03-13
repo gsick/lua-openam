@@ -37,11 +37,12 @@ __DATA__
 
         local status, json = obj:authenticate("$TEST_NGINX_OPENAM_USER", "$TEST_NGINX_OPENAM_PWD")
 
-        if status ~= ngx.HTTP_OK then
-          ngx.exit(ngx.HTTP_UNAUTHORIZED)
+        if not json.tokenId then
+          ngx.say("something bad happens")
+          return
         end
 
-        ngx.say("OK")
+        ngx.exit(status)
     ';
     }
 --- request
@@ -49,7 +50,6 @@ GET /a
 --- response_headers_like
 Set-Cookie: iplanetDirectoryPro=.*
 --- response_body
-OK
 --- error_code: 200
 --- no_error_log
 [error]
@@ -65,11 +65,12 @@ OK
 
         local status, json = obj:authenticate(nil, "$TEST_NGINX_OPENAM_PWD")
 
-        if status == ngx.HTTP_UNAUTHORIZED then
-          ngx.exit(ngx.HTTP_UNAUTHORIZED)
+        if json.tokenId then
+          ngx.say("something bad happens")
+          return
         end
 
-        ngx.say("OK")
+        ngx.exit(status)
     ';
     }
 --- request
@@ -92,11 +93,12 @@ GET /a
 
         local status, json = obj:authenticate("$TEST_NGINX_OPENAM_USER", nil)
 
-        if status == ngx.HTTP_UNAUTHORIZED then
-          ngx.exit(ngx.HTTP_UNAUTHORIZED)
+        if json.tokenId then
+          ngx.say("something bad happens")
+          return
         end
 
-        ngx.say("OK")
+        ngx.exit(status)
     ';
     }
 --- request
@@ -119,11 +121,12 @@ GET /a
 
         local status, json = obj:authenticate(nil, nil)
 
-        if status == ngx.HTTP_UNAUTHORIZED then
-          ngx.exit(ngx.HTTP_UNAUTHORIZED)
+        if json.tokenId then
+          ngx.say("something bad happens")
+          return
         end
 
-        ngx.say("OK")
+        ngx.exit(status)
     ';
     }
 --- request
@@ -146,11 +149,12 @@ GET /a
 
         local status, json = obj:authenticate(nil, nil)
 
-        if status == ngx.HTTP_UNAUTHORIZED then
-          ngx.exit(ngx.HTTP_UNAUTHORIZED)
+        if json.tokenId then
+          ngx.say("something bad happens")
+          return
         end
 
-        ngx.say("OK")
+        ngx.exit(status)
     ';
     }
 --- request
@@ -173,11 +177,12 @@ GET /a
 
         local status, json = obj:authenticate("$TEST_NGINX_OPENAM_USER_TEST", "$TEST_NGINX_OPENAM_PWD_TEST", "$TEST_NGINX_OPENAM_REALM")
 
-        if status ~= ngx.HTTP_OK then
-          ngx.exit(ngx.HTTP_UNAUTHORIZED)
+        if not json.tokenId then
+          ngx.say("something bad happens")
+          return
         end
 
-        ngx.say("OK")
+        ngx.exit(status)
     ';
     }
 --- request
@@ -185,7 +190,6 @@ GET /a
 --- response_headers_like
 Set-Cookie: iplanetDirectoryPro=.*
 --- response_body
-OK
 --- error_code: 200
 --- no_error_log
 [error]
@@ -201,11 +205,12 @@ OK
 
         local status, json = obj:authenticate("$TEST_NGINX_OPENAM_USER", "$TEST_NGINX_OPENAM_PWD", "$TEST_NGINX_OPENAM_REALM")
 
-        if status == ngx.HTTP_UNAUTHORIZED then
-          ngx.exit(ngx.HTTP_UNAUTHORIZED)
+        if json.tokenId then
+          ngx.say("something bad happens")
+          return
         end
 
-        ngx.say("OK")
+        ngx.exit(status)
     ';
     }
 --- request

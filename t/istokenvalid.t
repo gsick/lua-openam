@@ -24,37 +24,7 @@ run_tests();
 
 __DATA__
 
-=== TEST 1: should logout and expire default session cookie
---- http_config eval: $::HttpConfig
---- config
-    location /a {
-      content_by_lua '
-        local openam = require "openam"
-        local obj = openam.new("$TEST_NGINX_OPENAM_URI")
-
-        local status, json = obj:authenticate("$TEST_NGINX_OPENAM_USER", "$TEST_NGINX_OPENAM_PWD")
-
-        local status2, json2 = obj:logout(json.tokenId)
-
-        if not json2.result then
-          ngx.say("something bad happens")
-          return
-        end
-
-        ngx.exit(status)
-      ';
-    }
---- request
-GET /a
---- response_headers_like
-Set-Cookie: (iplanetDirectoryPro=.*)(Expires=Thu, 01-Jan-70 00:00:00 GMT)(.*)
---- response_body
---- error_code: 200
---- no_error_log
-[error]
-[warn]
-
-=== TEST 2: should logout and expire default session cookie
+=== TEST 1: should be valid
 --- http_config eval: $::HttpConfig
 --- config
     location /a {
@@ -65,9 +35,64 @@ Set-Cookie: (iplanetDirectoryPro=.*)(Expires=Thu, 01-Jan-70 00:00:00 GMT)(.*)
         local status, json = obj:authenticate("$TEST_NGINX_OPENAM_USER", "$TEST_NGINX_OPENAM_PWD")
 
         ngx.req.set_header("Cookie", "iplanetDirectoryPro=" ..  json.tokenId)
-        local status2, json2 = obj:logout()
+        local status2, json2 = obj:isTokenValid()
 
-        if not json2.result then
+        if not json2.valid then
+          ngx.say("something bad happens")
+          return
+        end
+
+        ngx.exit(status)
+      ';
+    }
+--- request
+GET /a
+--- response_body
+--- error_code: 200
+--- no_error_log
+[error]
+[warn]
+
+=== TEST 2: should be invalid
+--- http_config eval: $::HttpConfig
+--- config
+    location /a {
+      content_by_lua '
+        local openam = require "openam"
+        local obj = openam.new("$TEST_NGINX_OPENAM_URI")
+
+        ngx.req.set_header("Cookie", "iplanetDirectoryPro=" ..  "AQIC5wM2LY4SfcwPiAWTY3Cuk5xJ65ei_a9OgJ0rjPKdXD8.*AAJTSQACMDEAAlNLABQtMzg4ODM1NjExNTQzODA5MjYwOQ..*")
+        local status, json = obj:isTokenValid()
+
+        if json.valid then
+          ngx.say("something bad happens")
+          return
+        end
+
+        ngx.exit(status)
+      ';
+    }
+--- request
+GET /a
+--- response_body_like chop
+^(.*)(401 Authorization Required)(.*)$
+--- error_code: 401
+--- no_error_log
+[error]
+[warn]
+
+=== TEST 3: should be invalid and logout
+--- http_config eval: $::HttpConfig
+--- config
+    location /a {
+      content_by_lua '
+        local openam = require "openam"
+        local obj = openam.new("$TEST_NGINX_OPENAM_URI")
+
+        ngx.req.set_header("Cookie", "iplanetDirectoryPro=" ..  "AQIC5wM2LY4SfcwPiAWTY3Cuk5xJ65ei_a9OgJ0rjPKdXD8.*AAJTSQACMDEAAlNLABQtMzg4ODM1NjExNTQzODA5MjYwOQ..*")
+        local status, json = obj:isTokenValid(true)
+
+        if json.result or not json.code then
           ngx.say("something bad happens")
           return
         end
@@ -84,4 +109,3 @@ Set-Cookie: (iplanetDirectoryPro=.*)(Expires=Thu, 01-Jan-70 00:00:00 GMT)(.*)
 --- no_error_log
 [error]
 [warn]
-

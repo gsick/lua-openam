@@ -350,12 +350,14 @@ function _Openam.isTokenValid(self, logout, token)
 
       log(ngx.NOTICE, "isTokenValid", res.status, token, nil, nil, tostring(json.valid))
 
-      if logout and not json.valid then
-        local status, json2 = self:logout(token)
-        return status, json2
+      if not json.valid then
+        if logout then
+          return self:logout(token)
+        end
+        return ngx.HTTP_UNAUTHORIZED, json
+      else
+        return ngx.HTTP_OK, json
       end
-
-      return res.status, json
     end
 
     log(ngx.ERR, "isTokenValid", res.status, token, nil, uri, res.body)
