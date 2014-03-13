@@ -16,6 +16,9 @@ our $HttpConfig = qq{
 $ENV{TEST_NGINX_OPENAM_URI} ||= "http://openam.example.com:8080/openam";
 $ENV{TEST_NGINX_OPENAM_USER} ||= "user";
 $ENV{TEST_NGINX_OPENAM_PWD} ||= "password";
+$ENV{TEST_NGINX_OPENAM_REALM} ||= "/test";
+$ENV{TEST_NGINX_OPENAM_USER_TEST} ||= "testtesttest";
+$ENV{TEST_NGINX_OPENAM_PWD_TEST} ||= "testtesttest";
 
 no_long_string();
 #no_diff();
@@ -34,7 +37,7 @@ __DATA__
 
         local status, json = obj:authenticate("$TEST_NGINX_OPENAM_USER", "$TEST_NGINX_OPENAM_PWD")
 
-        if not status == ngx.HTTP_OK then
+        if status ~= ngx.HTTP_OK then
           ngx.exit(ngx.HTTP_UNAUTHORIZED)
         end
 
@@ -133,3 +136,84 @@ GET /a
 [error]
 [warn]
 
+=== TEST 5: should not authenticate without openam
+--- http_config eval: $::HttpConfig
+--- config
+    location /a {
+      content_by_lua '
+        local openam = require "openam"
+        local obj = openam.new("http://127.0.0.1/openam")
+
+        local status, json = obj:authenticate(nil, nil)
+
+        if status == ngx.HTTP_UNAUTHORIZED then
+          ngx.exit(ngx.HTTP_UNAUTHORIZED)
+        end
+
+        ngx.say("OK")
+    ';
+    }
+--- request
+GET /a
+--- raw_response_headers_unlike: Set-Cookie:.*
+--- response_body_like chop
+^(.*)(500 Internal Server Error)(.*)$
+--- error_code: 500
+--- no_error_log
+[error]
+[warn]
+
+=== TEST 6: should authenticate in a realm
+--- http_config eval: $::HttpConfig
+--- config
+    location /a {
+      content_by_lua '
+        local openam = require "openam"
+        local obj = openam.new("$TEST_NGINX_OPENAM_URI")
+
+        local status, json = obj:authenticate("$TEST_NGINX_OPENAM_USER_TEST", "$TEST_NGINX_OPENAM_PWD_TEST", "$TEST_NGINX_OPENAM_REALM")
+
+        if status ~= ngx.HTTP_OK then
+          ngx.exit(ngx.HTTP_UNAUTHORIZED)
+        end
+
+        ngx.say("OK")
+    ';
+    }
+--- request
+GET /a
+--- response_headers_like
+Set-Cookie: iplanetDirectoryPro=.*
+--- response_body
+OK
+--- error_code: 200
+--- no_error_log
+[error]
+[warn]
+
+=== TEST 7: should not authenticate in a realm
+--- http_config eval: $::HttpConfig
+--- config
+    location /a {
+      content_by_lua '
+        local openam = require "openam"
+        local obj = openam.new("$TEST_NGINX_OPENAM_URI")
+
+        local status, json = obj:authenticate("$TEST_NGINX_OPENAM_USER", "$TEST_NGINX_OPENAM_PWD", "$TEST_NGINX_OPENAM_REALM")
+
+        if status == ngx.HTTP_UNAUTHORIZED then
+          ngx.exit(ngx.HTTP_UNAUTHORIZED)
+        end
+
+        ngx.say("OK")
+    ';
+    }
+--- request
+GET /a
+--- raw_response_headers_unlike: Set-Cookie:.*
+--- response_body_like chop
+^(.*)(401 Authorization Required)(.*)$
+--- error_code: 401
+--- no_error_log
+[error]
+[warn]

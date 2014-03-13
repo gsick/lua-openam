@@ -293,7 +293,7 @@ function _Openam.logout(self, token)
 end
 
 
--- tranform weird response "boolean=true" or "boolean=false" to json
+-- tranform weird response "boolean=true" or "boolean=false" to json with a custom key
 
 local function booleanResponseDecode(cjson, text, key_name)
   local valid = false
