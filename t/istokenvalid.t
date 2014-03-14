@@ -6,7 +6,7 @@ use lib '/tmp/test/test-nginx/lib';
 use Test::Nginx::Socket;
 use Cwd qw(cwd);
 
-plan tests => repeat_each() * (blocks() * 4) + 1;
+plan tests => repeat_each() * (blocks() * 4) + 2;
 
 my $pwd = cwd();
 
