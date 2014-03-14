@@ -191,3 +191,36 @@ GET /a
 --- no_error_log
 [error]
 [warn]
+
+=== TEST 6: should read identity (custom cookie name)
+--- http_config eval: $::HttpConfig
+--- config
+    location /a {
+      content_by_lua '
+        local cjson_safe = require "cjson.safe"
+        local cjson = cjson_safe.new()
+
+        local openam = require "openam"
+        local obj = openam.new("$TEST_NGINX_OPENAM_URI", {name = "session"})
+
+        local status, json = obj:authenticate("$TEST_NGINX_OPENAM_USER", "$TEST_NGINX_OPENAM_PWD")
+
+        ngx.req.set_header("Cookie", "session=" ..  json.tokenId)
+        local status2, json2 = obj:readIdentity("$TEST_NGINX_OPENAM_USER_TEST")
+
+        if not json2.username then
+          ngx.say("something bad happens")
+          return
+        end
+
+        ngx.say(cjson.encode(json2))
+      ';
+    }
+--- request
+GET /a
+--- response_body_like chop
+\{(.*)\}
+--- error_code: 200
+--- no_error_log
+[error]
+[warn]

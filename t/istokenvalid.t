@@ -113,3 +113,61 @@ Set-Cookie: (iplanetDirectoryPro=.*)(Expires=Thu, 01-Jan-70 00:00:00 GMT)(.*)
 --- no_error_log
 [error]
 [warn]
+
+=== TEST 4: should be valid (custom cookie name)
+--- http_config eval: $::HttpConfig
+--- config
+    location /a {
+      content_by_lua '
+        local openam = require "openam"
+        local obj = openam.new("$TEST_NGINX_OPENAM_URI", {name = "session"})
+
+        local status, json = obj:authenticate("$TEST_NGINX_OPENAM_USER", "$TEST_NGINX_OPENAM_PWD")
+
+        ngx.req.set_header("Cookie", "session=" ..  json.tokenId)
+        local status2, json2 = obj:isTokenValid()
+
+        if not json2.valid then
+          ngx.say("something bad happens")
+          return
+        end
+
+        ngx.exit(status)
+      ';
+    }
+--- request
+GET /a
+--- response_body
+--- error_code: 200
+--- no_error_log
+[error]
+[warn]
+
+=== TEST 5: should be invalid and logout (custom cookie name)
+--- http_config eval: $::HttpConfig
+--- config
+    location /a {
+      content_by_lua '
+        local openam = require "openam"
+        local obj = openam.new("$TEST_NGINX_OPENAM_URI", {name = "session"})
+
+        ngx.req.set_header("Cookie", "session=" ..  "AQIC5wM2LY4SfcwPiAWTY3Cuk5xJ65ei_a9OgJ0rjPKdXD8.*AAJTSQACMDEAAlNLABQtMzg4ODM1NjExNTQzODA5MjYwOQ..*")
+        local status, json = obj:isTokenValid(true)
+
+        if not json.code then
+          ngx.say("something bad happens")
+          return
+        end
+
+        ngx.exit(status)
+      ';
+    }
+--- request
+GET /a
+--- response_headers_like
+Set-Cookie: (session=.*)(Expires=Thu, 01-Jan-70 00:00:00 GMT)(.*)
+--- response_body
+--- error_code: 200
+--- no_error_log
+[error]
+[warn]

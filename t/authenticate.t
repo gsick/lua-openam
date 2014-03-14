@@ -226,3 +226,31 @@ GET /a
 --- no_error_log
 [error]
 [warn]
+
+=== TEST 8: should authenticate (custom cookie name)
+--- http_config eval: $::HttpConfig
+--- config
+    location /a {
+      content_by_lua '
+        local openam = require "openam"
+        local obj = openam.new("$TEST_NGINX_OPENAM_URI", {name = "session"})
+
+        local status, json = obj:authenticate("$TEST_NGINX_OPENAM_USER", "$TEST_NGINX_OPENAM_PWD")
+
+        if not json.tokenId then
+          ngx.say("something bad happens")
+          return
+        end
+
+        ngx.exit(status)
+    ';
+    }
+--- request
+GET /a
+--- response_headers_like
+Set-Cookie: session=.*
+--- response_body
+--- error_code: 200
+--- no_error_log
+[error]
+[warn]
