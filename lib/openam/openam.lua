@@ -1,5 +1,8 @@
+--[[ 
+The MIT License (MIT)
 
--- Copyright (c) 2014 gsick --
+Copyright (c) 2014 gsick
+]]
 
 
 -- dependencies

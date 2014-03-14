@@ -1,3 +1,7 @@
+# The MIT License (MIT)
+#
+# Copyright (c) 2014 gsick
+
 use lib '/tmp/test/test-nginx/lib';
 use Test::Nginx::Socket;
 use Cwd qw(cwd);
