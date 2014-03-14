@@ -119,7 +119,7 @@ The `redirect_params` table accepts the following fields:
 
 `status, json = openam:authenticate(username, password, realm?)`
 
-Authenticate an user. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.<br />
+Authenticate an user.<br />
 Add a session cookie with the openam token.
 
 * `username`: string, username
@@ -127,34 +127,34 @@ Add a session cookie with the openam token.
 * `realm`: string, realm used for authentication, optional
 
 Return:
-* `status`: response http status
-* `json`: nil if status not equal to 200 or 401 otherwise openam json response
+* `status`: http status `200` (authenticate) or `401` (invalid password/username), call `ngx.exit` with `HTTP_INTERNAL_SERVER_ERROR` if error
+* `json`: openam json response if status `200`, `nil` otherwise
 
 ### logout
 
 `status, json = openam:logout(token?)`
 
-Logout an user. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.<br />
+Logout an user.<br />
 Remove the session cookie with the openam token.
 
 * `token`: string, openam token, optional
 
 Return:
-* `status`: response http status
-* `json`: nil if no response otherwise openam json response
+* `status`: http status `200` (logout), call `ngx.exit` with `HTTP_INTERNAL_SERVER_ERROR` if error
+* `json`: openam json response if status `200`, `nil` otherwise
 
 ### isTokenValid
 
 `status, json = openam:logout(logout?, token?)`
 
-Check the validity of the token. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.<br />
+Check the validity of the token.<br />
 
 * `logout`: boolean, call logout if invalid token, optional
 * `token`: string, openam token, optional
 
 Return:
-* `status`: response http status
-* `json`: nil if status not equal to 200 otherwise openam json response
+* `status`: http status `200` (valid or sucess logout) or `401` (invalid), call `ngx.exit` with `HTTP_INTERNAL_SERVER_ERROR` if error
+* `json`: json response `{"valid": true|false}` if status `200`, `nil` otherwise
 
 ### authorize
 
