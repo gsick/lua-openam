@@ -225,9 +225,10 @@ function _Openam.authenticate(self, username, password, realm)
       return ngx.HTTP_UNAUTHORIZED, json
     end
 
-    -- should never be 200 here
+    -- should never be 200 or 401 here
+    -- there is an error, I forgive openam
     log(ngx.ERR, "authenticate", res.status, nil, username, uri, res.body)
-    return res.status, nil
+    return ngx.HTTP_UNAUTHORIZED, nil
   end
 
   if err then
@@ -281,6 +282,7 @@ function _Openam.logout(self, token)
       return ngx.HTTP_OK, json
     end
 
+    -- should never be 200 or 401 here
     -- there is an error, I forgive openam again
     -- a cookie expired is sent and logout become ok even if the session is maybe still alive in openam
     log(ngx.ERR, "logout", res.status, token, nil, uri, res.body)
@@ -363,8 +365,10 @@ function _Openam.isTokenValid(self, logout, token)
       end
     end
 
+    -- should never be 200 here
+    -- there is an error, I forgive openam
     log(ngx.ERR, "isTokenValid", res.status, token, nil, uri, res.body)
-    return res.status, nil
+    return ngx.HTTP_UNAUTHORIZED, nil
   end
 
   if err then
