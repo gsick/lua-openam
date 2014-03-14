@@ -31,11 +31,13 @@ server {
       local obj = openam.new(openam_uri, {name = "session"}, {success_url = false})
       local status, json = obj:authenticate("my_login", "my_password")
 
-      if status ~= ngx.HTTP_OK then
-        -- do something
-        -- e.g. ngx.redirect(...), ngx.exit(...)
+      if status == ngx.HTTP_OK then
+        -- session cookie added in the http response
+        return
       end
-      -- session cookie added in the http response
+
+      -- do something
+      -- e.g. ngx.redirect(...), ngx.exit(...)
     ';
     # proxy_pass/to/somewhere/...
   }
@@ -50,10 +52,12 @@ server {
       local status, json = obj:isTokenValid()
       -- local status, json = obj:authorize()
 
-      if status ~= ngx.HTTP_OK then
-        -- do something
-        -- e.g. ngx.redirect(...), ngx.exit(...)
+      if status == ngx.HTTP_OK then
+        return
       end
+
+      -- do something
+      -- e.g. ngx.redirect(...), ngx.exit(...)
     ';
     # proxy_pass/to/somewhere/...
   }
