@@ -2,7 +2,7 @@ use lib '/tmp/test/test-nginx/lib';
 use Test::Nginx::Socket;
 use Cwd qw(cwd);
 
-plan tests => repeat_each() * (blocks() * 5);
+plan tests => repeat_each() * (blocks() * 4) + 1;
 
 my $pwd = cwd();
 
@@ -92,7 +92,7 @@ GET /a
         ngx.req.set_header("Cookie", "iplanetDirectoryPro=" ..  "AQIC5wM2LY4SfcwPiAWTY3Cuk5xJ65ei_a9OgJ0rjPKdXD8.*AAJTSQACMDEAAlNLABQtMzg4ODM1NjExNTQzODA5MjYwOQ..*")
         local status, json = obj:isTokenValid(true)
 
-        if json.result or not json.code then
+        if not json.code then
           ngx.say("something bad happens")
           return
         end

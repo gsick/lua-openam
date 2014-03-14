@@ -272,16 +272,19 @@ function _Openam.logout(self, token)
 
     local json = jsonDecode(cjson, res.body)
 
-    -- expire cookie even if error
+    -- expire cookie even if there is a response with error
     setSessionCookie(self.cookie, token, true)
 
-    if res.status == ngx.HTTP_OK then
-      log(ngx.NOTICE, "logout", res.status, token, nil, nil, nil)
-      return res.status, json
+    -- openam send 401 when the token is expired, I forgive it, logout become ok
+    if res.status == ngx.HTTP_OK or res.status == ngx.HTTP_UNAUTHORIZED then
+      log(ngx.NOTICE, "logout", ngx.HTTP_OK, token, nil, nil, nil)
+      return ngx.HTTP_OK, json
     end
 
+    -- there is an error, I forgive openam again
+    -- a cookie expired is sent and logout become ok even if the session is maybe still alive in openam
     log(ngx.ERR, "logout", res.status, token, nil, uri, res.body)
-    return res.status, json
+    return ngx.HTTP_OK, json
   end
 
   if err then
@@ -440,7 +443,22 @@ end
 
 -- https://openam.example.com:8443/openam/json[/realm]/users/demo
 -- https://openam.example.com:8443/openam/json[/realm]/users/demo?_fields=name,uid
-
+-- admin
+-- 200 {"username":"amadmin","realm":"dc=openam,dc=forgerock,dc=org","mail":[],
+-- "sunidentitymsisdnnumber":[],"sn":["amAdmin"],"givenname":["amAdmin"],"telephonenumber":[],
+-- "universalid":["id=amadmin,ou=user,dc=openam,dc=forgerock,dc=org"],"employeenumber":[],
+-- "postaladdress":[],"cn":["amAdmin"],"iplanet-am-user-success-url":[],"roles":[],
+-- "iplanet-am-user-failure-url":[],"inetuserstatus":["Active"],
+-- "dn":["uid=amAdmin,ou=people,dc=openam,dc=forgerock,dc=org"],"iplanet-am-user-alias-list":[]}
+-- user
+-- 200 {"username":".....","realm":"dc=openam,dc=forgerock,dc=org","uid":["...."],
+-- "sn":["...."],"userPassword":["{SSHA}...."],
+-- "cn":["...."],"givenName":["...."],"inetUserStatus":["Active"],
+-- "dn":["uid=....,ou=people,dc=....,dc=...."],"objectClass":["devicePrintProfilesContainer",
+-- "person","sunIdentityServerLibertyPPService","inetorgperson","sunFederationManagerDataStore",
+-- "iPlanetPreferences","iplanet-am-auth-configuration-service","organizationalperson","sunFMSAML2NameIdentifier",
+-- "inetuser","forgerock-am-dashboard-service","iplanet-am-managed-person","iplanet-am-user-service",
+-- "sunAMAuthAccountLockout","top"],"universalid":["id=....,ou=user,dc=openam,dc=forgerock,dc=org"]}
 -- 404 {"code":404,"reason":"Not Found","message":"Resource cannot be found."},
 
 function _Openam.readIdentity(self, user, fields, realm, token)

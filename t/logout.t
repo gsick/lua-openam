@@ -85,3 +85,31 @@ Set-Cookie: (iplanetDirectoryPro=.*)(Expires=Thu, 01-Jan-70 00:00:00 GMT)(.*)
 [error]
 [warn]
 
+=== TEST 3: should logout and expire default session cookie with expired session
+--- http_config eval: $::HttpConfig
+--- config
+    location /a {
+      content_by_lua '
+        local openam = require "openam"
+        local obj = openam.new("$TEST_NGINX_OPENAM_URI")
+
+        ngx.req.set_header("Cookie", "iplanetDirectoryPro=" .. "AQIC5wM2LY4SfcwPiAWTY3Cuk5xJ65ei_a9OgJ0rjPKdXD8.*AAJTSQACMDEAAlNLABQtMzg4ODM1NjExNTQzODA5MjYwOQ..*")
+        local status, json = obj:logout()
+
+        if not json.code then
+          ngx.say("something bad happens")
+          return
+        end
+
+        ngx.exit(status)
+      ';
+    }
+--- request
+GET /a
+--- response_headers_like
+Set-Cookie: (iplanetDirectoryPro=.*)(Expires=Thu, 01-Jan-70 00:00:00 GMT)(.*)
+--- response_body
+--- error_code: 200
+--- no_error_log
+[error]
+[warn]
