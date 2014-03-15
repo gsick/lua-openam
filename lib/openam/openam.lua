@@ -429,14 +429,16 @@ function _Openam.authorize(self, uri_value, token)
       log(ngx.NOTICE, "authorize", res.status, token, nil, uri_value, tostring(json.authorize))
 
       if json.authorize then
-        return res.status, json
+        return ngx.HTTP_OK, json
       end
 
       return ngx.HTTP_UNAUTHORIZED, json
     end
 
+    -- should never be 200 here
+    -- there is an error, I forgive openam
     log(ngx.ERR, "authorize", res.status, token, nil, uri, res.body)
-    return res.status, nil
+    return ngx.HTTP_UNAUTHORIZED, nil
   end
 
   if err then
