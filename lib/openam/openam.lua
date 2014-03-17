@@ -166,6 +166,7 @@ end
 -- https://openam.example.com:8443/openam/json[/myRealm]/authenticate
 -- 200 { "tokenId": "AQIC5w...NTcy*", "successUrl": "/openam/console" }
 -- 401 { "errorMessage": "Invalid Password!!", "failureUrl": "http://www.example.com/401.html" } ??
+-- 401 {"code":401,"reason":"Unauthorized","message":"Authentication Failed!!"}
 -- 401 {"code":401,"reason":"Unauthorized","message":"Invalid Password!!"}
 
 function _Openam.authenticate(self, username, password, realm)
@@ -184,6 +185,7 @@ function _Openam.authenticate(self, username, password, realm)
 
   ngx.log(ngx.DEBUG, uri)
 
+  -- unicode (username/password) is just byte, convertion must be in server side
   local res, err = httpc:request_uri(uri, {
     method = "POST",
     body = "",
@@ -468,7 +470,8 @@ end
 -- "iPlanetPreferences","iplanet-am-auth-configuration-service","organizationalperson","sunFMSAML2NameIdentifier",
 -- "inetuser","forgerock-am-dashboard-service","iplanet-am-managed-person","iplanet-am-user-service",
 -- "sunAMAuthAccountLockout","top"],"universalid":["id=....,ou=user,dc=openam,dc=forgerock,dc=org"]}
--- 404 {"code":404,"reason":"Not Found","message":"Resource cannot be found."},
+-- 404 {"code":404,"reason":"Not Found","message":"Resource cannot be found."}
+-- 403 {"code":403,"reason":"Forbidden","message":"Permission to perform the read operation denied to id=測試測試測試測試,ou=user,o=test,ou=services,dc=openam,dc=forgerock,dc=org"}
 
 function _Openam.readIdentity(self, user, fields, realm, token)
 
