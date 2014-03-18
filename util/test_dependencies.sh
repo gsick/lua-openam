@@ -1,6 +1,18 @@
 #!/bin/sh
 set -e
 
+#wget http://packages.erlang-solutions.com/erlang-solutions-1.0-1.noarch.rpm
+#rpm -Uvh erlang-solutions-1.0-1.noarch.rpm
+#http://rpm.mag-sol.com/centos.html
+#add repo
+#yum install perl-CPAN
+#yum install perl-Test-Base
+#cpan -i YAML
+#cpan -i Test:Base
+#git clone https://github.com/agentzh/test-nginx.git
+#cd test-nginx
+#Makefile.PL
+
 cd /tmp
 wget https://github.com/pintsized/lua-resty-http/archive/v0.03.tar.gz
 tar -zxvf v0.03.tar.gz
