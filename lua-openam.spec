@@ -2,7 +2,7 @@
 %define luadatadir %{_datadir}/lua/%{luaver}
 
 Name:       lua-openam
-Version:    0.0.2
+Version:    0.0.3
 Release:    1%{?dist}
 Summary:    Lua OpenAM client driver for the nginx HttpLuaModule
 
@@ -44,11 +44,12 @@ rm -rf "$RPM_BUILD_ROOT"
 %files
 %defattr(-,root,root,-)
 %doc LICENSE README.md
-%{luadatadir}/*
-%{_bindir}/*
 
 
 %changelog
+* Tue Mar 18 2014 Gamaliel Sick <@> - 0.0.3-1
+- Update package
+
 * Mon Mar 17 2014 Gamaliel Sick <@> - 0.0.2-1
 - Update package
 
