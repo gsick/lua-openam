@@ -240,13 +240,13 @@ The included `Makefile` has generic settings.<br />
 First, review and update the included makefile to suit your platform (if required).<br />
 Next, install the module:
 
-```shell
+```bash
 make install
 ```
 
 Or install manually into your Lua module directory:
 
-```shell
+```bash
 cp lib/openam/openam.lua $LUA_MODULE_DIRECTORY
 ```
 
@@ -257,7 +257,7 @@ the included RPM spec file. Ensure the +rpm-build+ package (or similar)
 has been installed.<br />
 Build and install the module via RPM:
 
-```shell
+```bash
 rpmbuild -tb lua-openam-0.0.1.tar.gz
 rpm -Uvh $LUA_OPENAM_RPM
 ```
