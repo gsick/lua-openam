@@ -5,9 +5,30 @@ Lua OpenAM client driver for the nginx [HttpLuaModule](http://wiki.nginx.org/Htt
 Use [OpenAM RESTful API](http://openam.forgerock.org/openam-documentation/openam-doc-source/doc/dev-guide/index/chap-rest.html).<br />
 It is different than an OpenAM agent.<br />
 
+## Table of Contents
+=================
+
+* [Status](#status)
+* [Dependencies](#dependencies)
+* [Synopsis](#synopsis)
+* [API](#api)
+    * [new](#new)
+    * [authenticate](#authenticate)
+    * [logout](#logout)
+    * [isTokenValid](#isTokenValid)
+    * [authorize](#authorize)
+    * [readIdentity](#readIdentity)
+    * [escape_dn](#escape_dn)
+* [Installation](#installation)
+    * [Make](#make)
+    * [RPM](#rpm)
+    * [LuaRocks](#luarocks)
+* [Author - Contributors](#author - contributors)
+* [Licence](#licence)
+
 ## Status
 
-beta, the api may be change.
+0.0.1 released.
 
 ## Dependencies
 
@@ -17,7 +38,7 @@ beta, the api may be change.
 
 ## Synopsis
 
-```lua
+```nginx
 lua_package_cpath "/usr/lib64/lua/5.1/?.so;;";
 lua_package_path "/usr/lib64/lua/5.1/resty/http/?.lua;/usr/share/lua/5.1/openam/?.lua;;";
 
@@ -220,13 +241,13 @@ The included `Makefile` has generic settings.<br />
 First, review and update the included makefile to suit your platform (if required).<br />
 Next, install the module:
 
-```
+```shell
 make install
 ```
 
 Or install manually into your Lua module directory:
 
-```
+```shell
 cp lib/openam/openam.lua $LUA_MODULE_DIRECTORY
 ```
 
@@ -237,7 +258,7 @@ the included RPM spec file. Ensure the +rpm-build+ package (or similar)
 has been installed.<br />
 Build and install the module via RPM:
 
-```
+```shell
 rpmbuild -tb lua-openam-0.0.1.tar.gz
 rpm -Uvh $LUA_OPENAM_RPM
 ```
@@ -249,7 +270,7 @@ modules on a wide range of platforms (including Windows).<br />
 First, extract the Lua OpenAM source package.<br />
 Next, install the module:
 
-```
+```shell
 cd lua-openam-0.0.1
 luarocks make
 ```
