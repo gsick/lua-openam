@@ -27,7 +27,7 @@ It is different than an OpenAM agent.<br />
 
 ## Status
 
-0.0.1 released.
+0.0.2 released.
 
 ## Dependencies
 
@@ -272,7 +272,7 @@ has been installed.<br />
 Build and install the module via RPM:
 
 ```bash
-rpmbuild -tb 0.0.1.tar.gz
+rpmbuild -tb 0.0.2.tar.gz
 rpm -Uvh $LUA_OPENAM_RPM
 ```
 
@@ -284,7 +284,7 @@ First, extract the Lua OpenAM source package.<br />
 Next, install the module:
 
 ```bash
-cd lua-openam-0.0.1
+cd lua-openam-0.0.2
 luarocks make
 ```
 

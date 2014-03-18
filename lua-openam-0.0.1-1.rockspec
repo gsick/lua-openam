@@ -1,9 +1,9 @@
 package = "lua-openam"
-version = "0.0.1-1"
+version = "0.0.2-1"
 
 source = {
-    url = "https://github.com/gsick/lua-openam/archive/0.0.1.tar.gz",
-    dir = "lua-openam-0.0.1"
+    url = "https://github.com/gsick/lua-openam/archive/0.0.2.tar.gz",
+    dir = "lua-openam-0.0.2"
 }
 
 description = {
