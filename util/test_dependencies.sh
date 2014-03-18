@@ -1,4 +1,5 @@
-# Memo
+#!/bin/sh
+set -e
 
 cd /tmp
 wget https://github.com/pintsized/lua-resty-http/archive/v0.02.tar.gz
