@@ -11,8 +11,9 @@ beta, the api may be change.
 
 ## Dependencies
 
-* [Lua CJSON](http://www.kyne.com.au/~mark/software/lua-cjson.php)
+* [lua-cjson](http://www.kyne.com.au/~mark/software/lua-cjson.php)
 * [lua-resty-http](https://github.com/pintsized/lua-resty-http)
+* [luautf8](https://github.com/starwing/luautf8)
 
 ## Synopsis
 
@@ -30,6 +31,9 @@ server {
 
       local obj = openam.new(openam_uri, {name = "session"}, {success_url = false})
       local status, json = obj:authenticate("my_login", "my_password")
+      
+      -- Input can be escaped
+      -- local status, json = obj:authenticate(obj:escape_dn("my_login"), obj:escape_dn("my_password"))
 
       if status == ngx.HTTP_OK then
         -- session cookie added in the http response
@@ -175,7 +179,7 @@ Return:
 
 ### readIdentity
 
-`status, json = openam:readIdentity(self, user, fields?, realm?, token?)`
+`status, json = openam:readIdentity(user, fields?, realm?, token?)`
 
 Read an identity. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.<br />
 
@@ -187,6 +191,17 @@ Read an identity. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` sta
 Return:
 * `status`: response http status
 * `json`: nil if status not equal to 200 otherwise openam json response
+
+## escape_dn
+
+`result = openam:escape_dn(s)`
+
+Escape some special LDAP character, prevent LDAP injection
+
+* `s`: string
+
+Return:
+* `result`: escaped string
 
 ## Author
 

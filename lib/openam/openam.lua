@@ -9,6 +9,7 @@ Copyright (c) 2014 gsick
 
 local http = require "resty.http"
 local cjson_safe = require "cjson.safe"
+local utf8 = require 'utf8'
 
 
 -- default cookie params
@@ -94,6 +95,7 @@ local function log(level, cmd, status, token, username, uri, text)
 
   ngx.log(level, s)
 end
+
 
 
 
@@ -530,5 +532,48 @@ function _Openam.readIdentity(self, user, fields, realm, token)
   -- default return 500
   ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
 end
+
+
+-- Some char must be escaped for LDAP and/or to prevent LDAP injection
+-- More about LDAP injection see https://www.owasp.org/index.php/LDAP_injection
+-- 92 '\', 44 ',', 43 '+', 34 '"', 60 '<' 62 '>' 59 ';' 32 ' ', 35 '#'
+local char_must_be_escaped = {
+  [92] = '\\',
+  [44]  = ',',
+  [43]  = '+',
+  [34]  = '"',
+  [60]  = '<',
+  [62]  = '>',
+  [59]  = ';',
+}
+function _Openam.escape_dn(self, s)
+  local delta = 0
+  local idx = 1
+  local s_final = s
+  local s_len = utf8.len(s)
+
+  for pos, code in utf8.next, s do
+    -- if first char is ' ' or '#'
+    if idx == 1 and (code == 32 or code == 35) then
+      s_final = utf8.insert(s_final, idx + delta, "\\")
+      delta = delta + 1
+    end
+
+    if char_must_be_escaped[code] then
+      s_final = utf8.insert(s_final, idx + delta, "\\")
+      delta = delta + 1
+    end
+
+    idx = idx + 1
+
+    -- if last char is ' '
+    if idx == s_len and code == 32 then
+      s_final = utf8.insert(s_final, idx + delta, "\\")
+    end
+  end
+
+  return s_final
+end
+
 
 return _Openam
