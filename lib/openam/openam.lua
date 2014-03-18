@@ -100,7 +100,7 @@ end
 
 
 local _Openam = {
-  _VERSION = '0.0.3',
+  _VERSION = '0.0.4',
 }
 
 
