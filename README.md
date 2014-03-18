@@ -192,7 +192,7 @@ Return:
 * `status`: response http status
 * `json`: nil if status not equal to 200 otherwise openam json response
 
-## escape_dn
+### escape_dn
 
 `result = openam:escape_dn(s)`
 
