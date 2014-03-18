@@ -269,7 +269,7 @@ modules on a wide range of platforms (including Windows).<br />
 First, extract the Lua OpenAM source package.<br />
 Next, install the module:
 
-```shell
+```bash
 cd lua-openam-0.0.1
 luarocks make
 ```
