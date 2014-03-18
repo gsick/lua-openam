@@ -2,15 +2,15 @@
 set -e
 
 cd /tmp
-wget https://github.com/pintsized/lua-resty-http/archive/v0.02.tar.gz
-tar -zxvf v0.02.tar.gz
-cd lua-resty-http-0.02
+wget https://github.com/pintsized/lua-resty-http/archive/v0.03.tar.gz
+tar -zxvf v0.03.tar.gz
+cd lua-resty-http-0.03
 make PREFIX=/usr LUA_LIB_DIR=/usr/lib64/lua/5.1 install
 
 cd /tmp
 wget http://www.kyne.com.au/~mark/software/download/lua-cjson-2.1.0.tar.gz
 tar -zxvf lua-cjson-2.1.0.tar.gz
-cd lua-cjson
+lua-cjson-2.1.0
 make
 cp cjson.so /usr/lib64/lua/5.1
 
