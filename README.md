@@ -272,7 +272,7 @@ has been installed.<br />
 Build and install the module via RPM:
 
 ```bash
-rpmbuild -tb lua-openam-0.0.1.tar.gz
+rpmbuild -tb 0.0.1.tar.gz
 rpm -Uvh $LUA_OPENAM_RPM
 ```
 

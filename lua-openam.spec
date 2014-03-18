@@ -9,7 +9,7 @@ Summary:    Lua OpenAM client driver for the nginx HttpLuaModule
 Group:      Development/Libraries
 License:    MIT
 URL:        https://github.com/gsick/lua-openam
-Source0:    https://github.com/gsick/lua-openam/archive/lua-openam-%{version}.tar.gz
+Source0:    https://github.com/gsick/lua-openam/archive/%{version}.tar.gz
 BuildRoot:  %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 Requires:   lua >= %{luaver}
