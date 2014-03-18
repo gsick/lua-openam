@@ -19,7 +19,7 @@ beta, the api may be change.
 
 ```lua
 lua_package_cpath "/usr/lib64/lua/5.1/?.so;;";
-lua_package_path "/usr/lib64/lua/5.1/resty/http/?.lua;/usr/lib64/lua/5.1/openam/?.lua;;";
+lua_package_path "/usr/lib64/lua/5.1/resty/http/?.lua;/usr/share/lua/5.1/openam/?.lua;;";
 
 server {
 
@@ -203,7 +203,33 @@ Escape some special LDAP character, prevent LDAP injection
 Return:
 * `result`: escaped string
 
-## Author
+## Installation
+
+Lua OpenAM requires either http://www.lua.org[Lua] 5.1, Lua 5.2, or
+http://www.luajit.org[LuaJIT] to build.
+
+The build method can be selected from 4 options:
+
+* Make
+* CMake
+* RPM
+* LuaRocks
+
+### Make
+
+The included `Makefile` has generic settings.<br />
+First, review and update the included makefile to suit your platform (if required).<br />
+Next, install the module:
+
+[source,sh]
+make install
+
+Or install manually into your Lua module directory:
+
+[source,sh]
+cp lib/openam/openam.lua $LUA_MODULE_DIRECTORY
+
+## Author - Contributors
 
 Gamaliel Sick
 
