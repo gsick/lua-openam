@@ -11,10 +11,11 @@ plan tests => repeat_each() * (blocks() * 5);
 my $pwd = cwd();
 
 our $HttpConfig = qq{
-  #lua_package_path "$pwd/lib/?.lua;;";
   lua_package_cpath "/usr/lib64/lua/5.1/?.so;;";
-  lua_package_path "/usr/lib64/lua/5.1/resty/http/?.lua;/usr/lib64/lua/5.1/openam/?.lua;;";
+  lua_package_path "/usr/lib64/lua/5.1/resty/http/?.lua;$pwd/lib/?.lua;;";
   error_log  /var/log/nginx/error.log debug;
+
+  charset utf-8;
 };
 
 $ENV{TEST_NGINX_OPENAM_URI} ||= "http://openam.example.com:8080/openam";
