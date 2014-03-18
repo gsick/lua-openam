@@ -6,7 +6,6 @@ Use [OpenAM RESTful API](http://openam.forgerock.org/openam-documentation/openam
 It is different than an OpenAM agent.<br />
 
 ## Table of Contents
-=================
 
 * [Status](#status)
 * [Dependencies](#dependencies)
