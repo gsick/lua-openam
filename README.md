@@ -15,15 +15,15 @@ It is different than an OpenAM agent.<br />
     * [new](#new)
     * [authenticate](#authenticate)
     * [logout](#logout)
-    * [isTokenValid](#isTokenValid)
+    * [isTokenValid](#istokenvalid)
     * [authorize](#authorize)
-    * [readIdentity](#readIdentity)
+    * [readIdentity](#readidentity)
     * [escape_dn](#escape_dn)
 * [Installation](#installation)
     * [Make](#make)
     * [RPM](#rpm)
     * [LuaRocks](#luarocks)
-* [Author - Contributors](#author - contributors)
+* [Authors](#authors)
 * [Licence](#licence)
 
 ## Status
@@ -275,7 +275,7 @@ cd lua-openam-0.0.1
 luarocks make
 ```
 
-## Author - Contributors
+## Authors
 
 Gamaliel Sick
 
