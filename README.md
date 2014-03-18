@@ -125,7 +125,9 @@ server {
 
 ### new
 
-`openam = openam.new(uri, cookie_params?, redirect_params?)`
+```lua
+openam = openam.new(uri, cookie_params?, redirect_params?)
+```
 
 Creates the openam object. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.
 
@@ -145,7 +147,9 @@ The `redirect_params` table accepts the following fields:
 
 ### authenticate
 
-`status, json = openam:authenticate(username, password, realm?)`
+```lua
+status, json = openam:authenticate(username, password, realm?)
+```
 
 Authenticate an user.<br />
 Add a session cookie with the openam token.
@@ -160,7 +164,9 @@ Return:
 
 ### logout
 
-`status, json = openam:logout(token?)`
+```lua
+status, json = openam:logout(token?)
+```
 
 Logout an user.<br />
 Remove the session cookie with the openam token.
@@ -173,7 +179,9 @@ Return:
 
 ### isTokenValid
 
-`status, json = openam:logout(logout?, token?)`
+```lua
+status, json = openam:logout(logout?, token?)
+```
 
 Check the validity of the token.<br />
 
@@ -186,7 +194,9 @@ Return:
 
 ### authorize
 
-`status, json = openam:authorize(uri_value?, token?)`
+```lua
+status, json = openam:authorize(uri_value?, token?)
+```
 
 Check the access to an uri. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.<br />
 
@@ -199,7 +209,9 @@ Return:
 
 ### readIdentity
 
-`status, json = openam:readIdentity(user, fields?, realm?, token?)`
+```lua
+status, json = openam:readIdentity(user, fields?, realm?, token?)
+```
 
 Read an identity. In case of failures, call `ngx.exit` with `HTTP_FORBIDDEN` status.<br />
 
@@ -214,7 +226,9 @@ Return:
 
 ### escape_dn
 
-`result = openam:escape_dn(s)`
+```lua
+result = openam:escape_dn(s)
+```
 
 Escape some special LDAP character, prevent LDAP injection
 
